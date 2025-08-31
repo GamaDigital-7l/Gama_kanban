@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  gama-app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    image: gama-kanban:latest
+    container_name: gama-app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:password@gama-db:5432/gama
+      - SECRET_KEY=your_super_secret_key_here_change_this_in_production
+      - BASE_URL=http://localhost:3000
+      - ADMIN_EMAIL=admin@gama.local
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=admin123
+      - ADMIN_NAME=Administrador Gama
+    volumes:
+      - gama-uploads:/app/uploads
+      - gama-public:/app/public
+    depends_on:
+      gama-db:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  gama-db:
+    image: postgres:15-alpine
+    container_name: gama-db
+    environment:
+      - POSTGRES_DB=gama
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - gama-db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  gama-redis:
+    image: redis:7-alpine
+    container_name: gama-redis
+    volumes:
+      - gama-redis-data:/data
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  gama-db-data:
+  gama-redis-data:
+  gama-uploads:
+  gama-public:
+
+networks:
+  default:
+    name: gama-network

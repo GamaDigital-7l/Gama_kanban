@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAMA - Gerenciamento de Projetos</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header__left">
+                <h1 class="header__logo">🎯 GAMA</h1>
+                <nav class="header__nav">
+                    <button class="btn btn--outline btn--sm" id="newProjectBtn">
+                        Novo Projeto
+                    </button>
+                </nav>
+            </div>
+            <div class="header__right">
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="Buscar cards..." class="search-input">
+                </div>
+                <button class="btn btn--outline btn--sm" id="themeToggle">
+                    🌙 Tema
+                </button>
+            </div>
+        </header>
+
+        <div class="main-container">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar__header">
+                    <h2>Projetos</h2>
+                </div>
+                <div class="sidebar__projects" id="projectsList">
+                    <!-- Projects will be populated by JS -->
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="content">
+                <div class="project-header" id="projectHeader" style="display: none;">
+                    <div class="project-header__info">
+                        <h1 id="projectTitle">Selecione um Projeto</h1>
+                        <p id="projectDescription"></p>
+                    </div>
+                    <div class="project-header__actions">
+                        <button class="btn btn--outline btn--sm" id="editProjectBtn">
+                            Editar Projeto
+                        </button>
+                        <button class="btn btn--primary btn--sm" id="newColumnBtn">
+                            Nova Coluna
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="filters" id="filtersContainer" style="display: none;">
+                    <select id="labelFilter" class="form-control form-control--sm">
+                        <option value="">Todas as Labels</option>
+                    </select>
+                    <select id="memberFilter" class="form-control form-control--sm">
+                        <option value="">Todos os Membros</option>
+                    </select>
+                    <input type="date" id="dueDateFilter" class="form-control form-control--sm" placeholder="Data limite">
+                    <button class="btn btn--outline btn--sm" id="clearFilters">Limpar Filtros</button>
+                </div>
+
+                <!-- Kanban Board -->
+                <div class="kanban-board" id="kanbanBoard">
+                    <div class="welcome-message" id="welcomeMessage">
+                        <h2>Bem-vindo ao GAMA!</h2>
+                        <p>Selecione um projeto na barra lateral para começar ou crie um novo projeto.</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal: Project -->
+    <div class="modal hidden" id="projectModal">
+        <div class="modal__overlay" id="projectModalOverlay"></div>
+        <div class="modal__content">
+            <div class="modal__header">
+                <h2 id="projectModalTitle">Novo Projeto</h2>
+                <button class="modal__close" id="projectModalClose">&times;</button>
+            </div>
+            <div class="modal__body">
+                <form id="projectForm">
+                    <div class="form-group">
+                        <label class="form-label">Nome do Projeto</label>
+                        <input type="text" id="projectNameInput" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Descrição</label>
+                        <textarea id="projectDescInput" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Cor do Projeto</label>
+                        <div class="color-picker">
+                            <input type="color" id="projectColorInput" class="form-control" value="#4f46e5">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal__footer">
+                <button class="btn btn--outline" id="cancelProjectBtn">Cancelar</button>
+                <button class="btn btn--primary" id="saveProjectBtn">Salvar</button>
+                <button class="btn btn--outline" id="deleteProjectBtn" style="display: none;">Excluir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Card -->
+    <div class="modal hidden" id="cardModal">
+        <div class="modal__overlay" id="cardModalOverlay"></div>
+        <div class="modal__content modal__content--large">
+            <div class="modal__header">
+                <h2 id="cardModalTitle">Novo Card</h2>
+                <button class="modal__close" id="cardModalClose">&times;</button>
+            </div>
+            <div class="modal__body">
+                <form id="cardForm">
+                    <div class="form-group">
+                        <label class="form-label">Título</label>
+                        <input type="text" id="cardTitleInput" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Descrição</label>
+                        <textarea id="cardDescInput" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Labels</label>
+                        <div id="cardLabels" class="labels-container">
+                            <!-- Labels will be populated by JS -->
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Data de Vencimento</label>
+                        <input type="date" id="cardDueDateInput" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Membro Responsável</label>
+                        <select id="cardMemberInput" class="form-control">
+                            <option value="">Selecionar membro...</option>
+                            <option value="João Silva">João Silva</option>
+                            <option value="Maria Santos">Maria Santos</option>
+                            <option value="Carlos Santos">Carlos Santos</option>
+                            <option value="Ana Costa">Ana Costa</option>
+                            <option value="Paula Marketing">Paula Marketing</option>
+                            <option value="RH Team">RH Team</option>
+                        </select>
+                    </div>
+                </form>
+                
+                <!-- Comments Section -->
+                <div class="comments-section" id="commentsSection">
+                    <h3>Comentários</h3>
+                    <div id="commentsList" class="comments-list">
+                        <!-- Comments will be populated by JS -->
+                    </div>
+                    <div class="add-comment">
+                        <textarea id="newCommentInput" class="form-control" placeholder="Adicionar comentário..." rows="2"></textarea>
+                        <button class="btn btn--primary btn--sm" id="addCommentBtn">Adicionar</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal__footer">
+                <button class="btn btn--outline" id="cancelCardBtn">Cancelar</button>
+                <button class="btn btn--primary" id="saveCardBtn">Salvar</button>
+                <button class="btn btn--outline" id="deleteCardBtn" style="display: none;">Excluir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Column -->
+    <div class="modal hidden" id="columnModal">
+        <div class="modal__overlay" id="columnModalOverlay"></div>
+        <div class="modal__content">
+            <div class="modal__header">
+                <h2 id="columnModalTitle">Nova Coluna</h2>
+                <button class="modal__close" id="columnModalClose">&times;</button>
+            </div>
+            <div class="modal__body">
+                <form id="columnForm">
+                    <div class="form-group">
+                        <label class="form-label">Nome da Coluna</label>
+                        <input type="text" id="columnNameInput" class="form-control" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal__footer">
+                <button class="btn btn--outline" id="cancelColumnBtn">Cancelar</button>
+                <button class="btn btn--primary" id="saveColumnBtn">Salvar</button>
+                <button class="btn btn--outline" id="deleteColumnBtn" style="display: none;">Excluir</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
